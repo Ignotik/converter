@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 
-const ApiCurrency: React.FC = ({ onRatesLoaded }) => {
+const API_URL = "https://api.exchangerate-api.com/v4/latest/USD";
+
+interface ApiCurrencyProps {
+  onRatesLoaded: (rates: { [key: string]: number }) => void;
+}
+
+const ApiCurrency: React.FC<ApiCurrencyProps> = ({ onRatesLoaded }) => {
   useEffect(() => {
     axios
       .get(API_URL)
