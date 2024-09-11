@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import ApiCurrency from "./Components/apiCurrency";
+import React, { useEffect, useState } from "react";
+import ApiCurrency from "./Components/ApiCurrency";
 import { Link } from "react-router-dom";
 import "./index.scss";
+import { saveTransactions, getTransactions } from "./utils/LocalStorage";
 
-interface Transaction {
+export interface Transaction {
   from: string;
   to: string;
   amount: number;
@@ -18,25 +19,33 @@ const App: React.FC = () => {
   const [fromCurrency, setFromCurrency] = useState<string>("USD");
   const [toCurrency, setToCurrency] = useState<string>("EUR");
   const [convertedAmount, setConvertedAmount] = useState<number>(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>(
+    getTransactions()
+  );
   const [description, setDescription] = useState<string>("");
   const [transactionDate, setTransactionDate] = useState<Date>(new Date());
+
+  useEffect(() => {
+    saveTransactions(transactions);
+  }, [transactions]);
 
   const convertCurrency = () => {
     if (rates[fromCurrency] && rates[toCurrency]) {
       const result = amount * (rates[toCurrency] / rates[fromCurrency]);
       setConvertedAmount(result);
 
-      setTransactions([
-        ...transactions,
-        {
-          from: fromCurrency,
-          to: toCurrency,
-          amount,
-          convertedAmount: result,
-          description,
-          date: transactionDate,
-        },
+      const newTransaction: Transaction = {
+        from: fromCurrency,
+        to: toCurrency,
+        amount,
+        convertedAmount: result,
+        description,
+        date: transactionDate,
+      };
+
+      setTransactions((prevTransactions) => [
+        ...prevTransactions,
+        newTransaction,
       ]);
     }
   };
