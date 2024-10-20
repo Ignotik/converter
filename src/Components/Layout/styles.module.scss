@@ -1,0 +1,14 @@
+.header {
+  background-color: rgb(58, 209, 58);
+  padding: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+
+  .link {
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

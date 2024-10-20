@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 const API_URL = "https://api.exchangerate-api.com/v4/latest/USD";
 
@@ -20,12 +19,11 @@ const CurrencyList: React.FC = () => {
 
   return (
     <div className="container">
-      <h1>Курсы валют</h1>
-      <Link to="/">Назад</Link>
+      <h1 className="title">Курсы валют</h1>
       <ul>
         {Object.keys(rates).map((currency) => (
-          <li key={currency}>
-            {currency}: {rates[currency].toFixed(2)}
+          <li className="list" key={currency}>
+            {currency}: {rates[currency].toFixed(2)} к 1.00 USD
           </li>
         ))}
       </ul>

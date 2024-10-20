@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import ApiCurrency from "./Components/ApiCurrency";
-import { Link } from "react-router-dom";
 import "./index.scss";
 import { saveTransactions, getTransactions } from "./utils/LocalStorage";
 
@@ -24,12 +23,21 @@ const App: React.FC = () => {
   );
   const [description, setDescription] = useState<string>("");
   const [transactionDate, setTransactionDate] = useState<Date>(new Date());
+  const [errorMessage, setErrorMessage] = useState<string>(""); // Новое состояние для сообщения об ошибке
 
   useEffect(() => {
     saveTransactions(transactions);
   }, [transactions]);
 
   const convertCurrency = () => {
+    // Проверка на 0 или отрицательное значение
+    if (amount <= 0) {
+      setErrorMessage("Нельзя обменять 0 или отрицательное количество валюты.");
+      return; // Прерывание выполнения функции
+    }
+
+    setErrorMessage(""); // Сброс сообщения об ошибке, если ввод корректный
+
     if (rates[fromCurrency] && rates[toCurrency]) {
       const result = amount * (rates[toCurrency] / rates[fromCurrency]);
       setConvertedAmount(result);
@@ -39,7 +47,7 @@ const App: React.FC = () => {
         to: toCurrency,
         amount,
         convertedAmount: result,
-        description,
+        description: description || "Обмен валюты",
         date: transactionDate,
       };
 
@@ -52,12 +60,12 @@ const App: React.FC = () => {
 
   return (
     <div className="container">
-      <h1>Кошелёк обменник</h1>
+      <h1 className="title">Кошелёк обменник</h1>
 
       <ApiCurrency onRatesLoaded={setRates} />
 
       <div className="section">
-        <h2>Обменять валюту</h2>
+        <h2 className="title">Обменять валюту</h2>
         <input
           type="number"
           value={amount}
@@ -84,12 +92,18 @@ const App: React.FC = () => {
             </option>
           ))}
         </select>
-        <button onClick={convertCurrency}>Convert</button>
+        <button onClick={convertCurrency}>Обменять</button>
       </div>
+
+      {errorMessage && (
+        <div className="error-message">
+          <p>{errorMessage}</p>
+        </div>
+      )}
 
       {convertedAmount > 0 && (
         <div className="section">
-          <h2>Converted Amount</h2>
+          <h2>Конвертированная сумма</h2>
           <p>
             {convertedAmount.toFixed(2)} {toCurrency}
           </p>
@@ -97,12 +111,12 @@ const App: React.FC = () => {
       )}
 
       <div className="section">
-        <h2>Добавить транзакцию</h2>
+        <h2 className="title">Добавить описание</h2>
         <input
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description"
+          placeholder="Описание"
         />
         <input
           type="date"
@@ -112,21 +126,18 @@ const App: React.FC = () => {
       </div>
 
       <div className="section">
-        <h2>История транзакций</h2>
+        <h2 className="title">История транзакций</h2>
         <ul>
           {transactions.map((transaction, index) => (
-            <li key={index}>
-              {transaction.amount} {transaction.from} -{" "}
-              {transaction.convertedAmount.toFixed(2)} {transaction.to}
-              <br />
-              {transaction.description} - {transaction.date.toLocaleString()}
+            <li className="transaction" key={index}>
+              <p>
+                {transaction.amount} {transaction.from} -{" "}
+                {transaction.convertedAmount.toFixed(2)} {transaction.to} (
+                {transaction.description}) - {transaction.date.toLocaleString()}
+              </p>
             </li>
           ))}
         </ul>
-      </div>
-
-      <div className="section">
-        <Link to="/currencies">Посмотреть все курсы валют</Link>
       </div>
     </div>
   );
